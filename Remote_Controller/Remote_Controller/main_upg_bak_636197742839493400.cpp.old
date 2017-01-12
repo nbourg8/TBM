@@ -1,0 +1,18 @@
+/*
+ * Remote_Controller.cpp
+ *
+ * Created: 1/11/2017 11:31:20 PM
+ * Author : nbourg8
+ */ 
+
+#include <avr/io.h>
+
+
+int main(void)
+{
+    /* Replace with your application code */
+    while (1) 
+    {
+    }
+}
+
