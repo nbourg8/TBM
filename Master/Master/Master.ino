@@ -37,11 +37,18 @@ BYTE		DATA		DESCRIPTION														EXAMPLE
 
 #include <SD.h>
 #include <LiquidCrystal.h>
-LiquidCrystal lcd(12, 11, 10,9,8,7);
+LiquidCrystal lcd(17,16,15,14,13,12);
 
 #define pin_menuUP 20
 #define pin_Right 19
 #define pin_Left 18
+#define m1_R_EN 5
+#define m1_L_EN 6
+#define m1_RPWM 7
+#define m2_R_EN 8
+#define m2_L_EN 9
+#define m2_RPWM 10
+
 
 const int chipSelect_SD_default = 27; //SD pin chip select for FubarinoSD
 
@@ -61,9 +68,21 @@ int mySerialData[11];
 
 void setup()
 {
+	for(int i=5;i<9;i++)
+	{
+		pinMode(i,OUTPUT);
+	}
+	
+	for(int i=5;i<9;i++)
+	{
+		digitalWrite(i,LOW);
+	}
+	digitalWrite(m1_L_EN,HIGH);
+	digitalWrite(m1_R_EN,HIGH);
 	pinMode(pin_menuUP,INPUT);
 	pinMode(pin_Right,INPUT);
 	pinMode(pin_Left,INPUT);
+
 	
 	Serial.begin(115200);	// USB Comm Port
 	//Serial0.begin(115200);// UART1 - pins 8 (RX) and 9 (TX)
@@ -88,7 +107,9 @@ void setup()
 
 void loop()
 {
-	
+	analogWrite(m1_RPWM,speed*255/100);
+
+	//analogWrite(m2_RPWM,speed);
 	millis_current = millis();
 	if (Serial1.available() >=10)	//ensure Serial communication is functional - don't waste time if remote is sleeping
 	{
@@ -235,10 +256,27 @@ void editParam(String direction)
 	else if (mainMenu == 2)
 	{
 		//Factory Reset
-		speed = 0;
-		spin = 0;
-		vert_angle = 0;
-		horiz_angle = 0;
+		if (direction == "right")
+		{
+			lcd.clear();
+			lcd.home();
+			lcd.print("Resetting in ...");
+			for (int i = 3;i--;i>0)
+			{
+				lcd.setCursor(0,1);
+				lcd.print(i);
+				delay(1000);
+			}
+			speed = 0;
+			spin = 0;
+			vert_angle = 0;
+			horiz_angle = 0;
+			mainMenu = 0;
+		}
+		else
+		{
+			mainMenu = 0;
+		}
 		//confirm saved
 	}
 	else if (mainMenu == 3)
@@ -272,8 +310,7 @@ void editParam(String direction)
 		else if (direction == "left" && vert_angle > 0)
 		{
 			vert_angle = vert_angle - 1;
-		}
-		
+		}		
 	}
 	else if (mainMenu == 6)
 	{
